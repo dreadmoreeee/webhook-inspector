@@ -1,0 +1,20 @@
+{
+  "id": "evt_3Example0000000001",
+  "object": "event",
+  "api_version": "2024-06-20",
+  "created": 1790000000,
+  "type": "payment_intent.succeeded",
+  "livemode": false,
+  "data": {
+    "object": {
+      "id": "pi_3Example0000000001",
+      "object": "payment_intent",
+      "amount": 11498,
+      "currency": "cad",
+      "status": "succeeded",
+      "client_secret": "pi_3Example0000000001_secret_FakeFakeFake",
+      "metadata": {"order_id": "1042"},
+      "receipt_email": "customer@example.com"
+    }
+  }
+}

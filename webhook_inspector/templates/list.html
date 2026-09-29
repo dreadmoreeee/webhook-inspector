@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="muted">
+  {{ total }} stored request{{ "" if total == 1 else "s" }}{% if config.retention %} (keeping the newest {{ config.retention }}){% endif %}.
+  Send webhooks to <code>/hooks/&lt;name&gt;</code>.
+  {% if hook %}Showing hook <strong>{{ hook }}</strong> - <a href="/">show all</a>.{% endif %}
+</p>
+{% if rows %}
+<table>
+  <thead><tr><th>#</th><th>Hook</th><th>Method</th><th>Received</th><th>Status</th><th>Reason</th><th>Size</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr>
+    <td><a href="/requests/{{ r.id }}">{{ r.id }}</a></td>
+    <td><a href="/?hook={{ r.hook | urlencode }}">{{ r.hook }}</a></td>
+    <td class="mono">{{ r.method }}</td>
+    <td class="mono">{{ r.received_iso }}</td>
+    <td><span class="badge {{ r.status }}">{{ r.status }}</span></td>
+    <td>{{ r.reason }}</td>
+    <td class="num">{{ r.size }} B</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="box">Nothing received yet.</p>
+{% endif %}
+{% endblock %}

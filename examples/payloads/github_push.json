@@ -1,0 +1,8 @@
+{
+  "ref": "refs/heads/main",
+  "before": "0000000000000000000000000000000000000000",
+  "after": "1111111111111111111111111111111111111111",
+  "repository": {"id": 1, "name": "example-repo", "full_name": "example/example-repo", "private": false},
+  "pusher": {"name": "example", "email": "example@example.com"},
+  "head_commit": {"id": "1111111111111111111111111111111111111111", "message": "Fix typo in README"}
+}

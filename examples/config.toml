@@ -1,0 +1,24 @@
+# Example webhook-inspector config. The secrets below are fake test values.
+#   python -m webhook_inspector serve --config examples/config.toml
+
+db = "webhooks.db"        # relative paths are resolved against this file's folder
+retention = 500           # keep the newest 500 requests (0 = unlimited)
+allow_unknown_hooks = true
+
+[hooks.stripe-test]
+provider = "stripe"
+secret = "whsec_example_do_not_use_in_production"
+# secret_env = "STRIPE_WEBHOOK_SECRET"   # read the secret from an env var instead
+tolerance = 300
+replay_to = "http://127.0.0.1:3000/webhooks/stripe"
+
+[hooks.github-test]
+provider = "github"
+secret = "github-example-secret"
+
+[hooks.shopify-test]
+provider = "shopify"
+secret = "shopify-example-secret"
+
+[hooks.plain]
+provider = "none"

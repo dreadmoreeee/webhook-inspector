@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}#{{ rec.id }} {{ rec.hook }} - webhook-inspector{% endblock %}
+{% block content %}
+{% set rv = "?reveal=1" if reveal else "" %}
+<p><a href="/">&larr; all requests</a></p>
+<h1 style="font-size:18px">#{{ rec.id }} <code>{{ rec.method }} {{ rec.path }}</code>
+  <span class="badge {{ rec.status }}">{{ rec.status }}</span></h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+<div class="box">
+  <strong>Verification:</strong> <span class="badge {{ rec.status }}">{{ rec.status }}</span> {{ rec.reason }}<br>
+  <span class="muted">Hook <strong>{{ rec.hook }}</strong>
+  (provider: {{ hook.provider if hook else "not in config" }}) - received {{ rec.received_iso }}
+  from {{ rec.client_ip or "unknown" }} - {{ rec.size }} bytes</span>
+</div>
+
+<p>
+  {% if reveal %}
+  Secrets are <strong>shown</strong>. <a href="/requests/{{ rec.id }}">Hide secrets</a>
+  {% else %}
+  Secrets are hidden. <a href="/requests/{{ rec.id }}?reveal=1">Reveal</a>
+  {% endif %}
+  | Export: <a href="/requests/{{ rec.id }}/curl{{ rv }}">curl</a>,
+  <a href="/requests/{{ rec.id }}/fixture{{ rv }}">pytest fixture</a>
+  {% if not reveal %}<span class="muted">(redacted; reveal first for byte-exact exports)</span>{% endif %}
+</p>
+
+<h2>Headers</h2>
+<table>
+  <tbody>
+  {% for name, value in headers %}
+  <tr><th style="width:30%">{{ name }}</th><td class="mono">{{ value }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Query</h2>
+{% if query %}
+<table><tbody>
+  {% for name, value in query %}<tr><th style="width:30%">{{ name }}</th><td class="mono">{{ value }}</td></tr>{% endfor %}
+</tbody></table>
+{% else %}<p class="muted">No query string.</p>{% endif %}
+
+<h2>Body <span class="muted">({{ body.kind }}{% if body.redacted %}, redacted{% endif %})</span></h2>
+{% if body.kind == "empty" %}<p class="muted">Empty body.</p>
+{% else %}
+{% if body.kind == "binary" %}<p class="muted">Not UTF-8; shown as base64.</p>{% endif %}
+<pre>{{ body.text }}</pre>
+{% endif %}
+
+<h2 id="replays">Replay</h2>
+<div class="box">
+  <form class="inline" method="post" action="/requests/{{ rec.id }}/replay">
+    <label>Target URL <input type="url" name="to" required placeholder="http://127.0.0.1:3000/webhooks/stripe" value="{{ replay_to }}"></label>
+    {% if can_resign %}<label><input type="checkbox" name="resign" value="1"> re-sign for Stripe (fresh t= and v1=)</label>{% endif %}
+    <button type="submit">Send once</button>
+  </form>
+  <p class="muted">Sends the original method, headers and body (minus hop-by-hop headers). Nothing is replayed automatically.</p>
+</div>
+{% if replays %}
+<table>
+  <thead><tr><th>Sent</th><th>Target</th><th>Re-signed</th><th>Response</th><th>Time</th></tr></thead>
+  <tbody>
+  {% for p in replays %}
+  <tr>
+    <td class="mono">{{ p.sent_iso }}</td>
+    <td class="mono">{{ p.target }}</td>
+    <td>{{ "yes" if p.resigned else "no" }}</td>
+    <td>{% if p.error %}<span class="badge invalid">error</span> {{ p.error }}{% else %}<strong>{{ p.status_code }}</strong>{% endif %}</td>
+    <td class="num">{{ p.elapsed_ms }} ms</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}
